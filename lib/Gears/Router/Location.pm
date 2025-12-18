@@ -13,6 +13,7 @@ has param 'path' => (
 );
 
 has field '_regex' => (
+	isa => RegexpRef,
 	lazy => 1,
 );
 
@@ -44,7 +45,7 @@ sub matches ($self, $request_path)
 	return $request_path =~ $self->_regex;
 }
 
-around 'match' => sub ($orig, $self, $request_path) {
+around match => sub ($orig, $self, $request_path) {
 	if ($self->matches($request_path)) {
 		my $result = $self->$orig($request_path);
 		unshift $result->@*, $self;
