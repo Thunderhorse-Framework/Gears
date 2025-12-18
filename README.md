@@ -1,5 +1,5 @@
 # Gears
-A Perl module for blah blah blah
+A framework to build web frameworks
 
 ## Code and documentation
 [Gears on CPAN](https://metacpan.org/release/Gears)
@@ -15,5 +15,4 @@ bigger so we can talk it through.
 
 ### Author
 Bartosz Jarzyna <bbrtj.pro@gmail.com>
-
 

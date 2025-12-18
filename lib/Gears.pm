@@ -1,15 +1,19 @@
 package Gears;
 
-use v5.14;
-use warnings;
+use v5.40;
 
-1;
+###################################################
+# ~~~~~~~~~~ We fear not our mortality ~~~~~~~~~~ #
+# ~~~~ We'll serve to the best of our ability ~~~ #
+# ~~~~~~ We give our lives to our masters ~~~~~~~ #
+# ~~~~~~~~~ We vow to smite our enemies ~~~~~~~~~ #
+###################################################
 
 __END__
 
 =head1 NAME
 
-Gears - New module
+Gears - A framework to build web frameworks
 
 =head1 SYNOPSIS
 
@@ -19,11 +23,11 @@ Gears - New module
 
 =head1 DESCRIPTION
 
-This module lets you blah blah blah.
+This module delivers basic parts of a web framework.
 
 =head1 SEE ALSO
 
-L<Some::Module>
+L<Thunderhorse>
 
 =head1 AUTHOR
 
