@@ -46,8 +46,8 @@ sub matches ($self, $request_path)
 
 around 'match' => sub ($orig, $self, $request_path) {
 	if ($self->matches($request_path)) {
-		my $result = $orig->($request_path);
-		push $result->@*, $self;
+		my $result = $self->$orig($request_path);
+		unshift $result->@*, $self;
 		return $result;
 	}
 

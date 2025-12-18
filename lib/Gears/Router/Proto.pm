@@ -5,6 +5,7 @@ use Mooish::Base -standard, -role;
 
 requires qw(
 	_build_router
+	path
 );
 
 has field 'router' => (
@@ -20,10 +21,10 @@ has field 'locations' => (
 
 sub add ($self, $path, %data)
 {
-	my $location = $self->_router->location_impl->new(
+	my $location = $self->router->location_impl->new(
 		%data,
 		parent => $self,
-		path => $match,
+		path => $self->path . $path,
 	);
 
 	push $self->locations->@*, $location;
