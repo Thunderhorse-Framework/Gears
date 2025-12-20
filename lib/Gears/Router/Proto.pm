@@ -3,6 +3,8 @@ package Gears::Router::Proto;
 use v5.40;
 use Mooish::Base -standard, -role;
 
+use Gears qw(load_package);
+
 requires qw(
 	_build_router
 	path
@@ -21,7 +23,7 @@ has field 'locations' => (
 
 sub add ($self, $path, %data)
 {
-	my $location = $self->router->location_impl->new(
+	my $location = load_package($self->router->location_impl)->new(
 		%data,
 		parent => $self,
 		path => $self->path . $path,

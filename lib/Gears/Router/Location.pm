@@ -3,7 +3,7 @@ package Gears::Router::Location;
 use v5.40;
 use Mooish::Base -standard;
 
-use Gears::Router::Comparator::Prefix;
+use Gears qw(load_package);
 
 has param 'parent' => (
 	isa => ConsumerOf ['Gears::Router::Proto'],
@@ -14,18 +14,20 @@ has param 'path' => (
 	isa => Str,
 );
 
-has param 'comparator' => (
+has field '_comparator' => (
 	isa => InstanceOf ['Gears::Router::Comparator'],
-	default => sub { Gears::Router::Comparator::Prefix->new },
+	lazy => 1,
 );
 
 with qw(
 	Gears::Router::Proto
 );
 
-sub BUILD ($self, $)
+sub _build_comparator ($self)
 {
-	$self->comparator->set_location($self);
+	return load_package($self->router->comparator_impl)->new(
+		location => $self,
+	);
 }
 
 sub _build_router ($self)
@@ -34,7 +36,7 @@ sub _build_router ($self)
 }
 
 around match => sub ($orig, $self, $request_path) {
-	if ($self->comparator->compare($request_path)) {
+	if ($self->_comparator->compare($request_path)) {
 		my $result = $self->$orig($request_path);
 		unshift $result->@*, $self;
 		return $result;

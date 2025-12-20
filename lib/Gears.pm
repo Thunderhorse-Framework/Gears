@@ -1,13 +1,33 @@
 package Gears;
 
-use v5.40;
-
 ###################################################
 # ~~~~~~~~~~ We fear not our mortality ~~~~~~~~~~ #
 # ~~~~ We'll serve to the best of our ability ~~~ #
 # ~~~~~~ We give our lives to our masters ~~~~~~~ #
 # ~~~~~~~~~ We vow to smite our enemies ~~~~~~~~~ #
 ###################################################
+
+use v5.40;
+
+# TODO: replace with load_module when it stabilizes
+use Module::Load qw(load);
+
+# TODO: replace with export_lexically when it stabilizes
+use Exporter qw(import);
+our @EXPORT_OK = qw(
+	load_package
+);
+
+sub load_package ($package)
+{
+	state %loaded;
+
+	# only load package once for a given class name
+	return $loaded{$package} //= do {
+		load $package;
+		$package;
+	};
+}
 
 __END__
 
