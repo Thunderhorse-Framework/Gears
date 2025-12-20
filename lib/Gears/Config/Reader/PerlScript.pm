@@ -56,14 +56,14 @@ sub parse ($self, $config, $filename)
 	$vars_string
 	PERL
 
-	return Gears::X::Config->trap_into(
-		sub {
-			$self->_clean_eval(
-				$eval . $self->_get_contents($filename),
-				\%vars,
-			);
-		},
-		"error in $filename"
-	);
+	try {
+		return $self->_clean_eval(
+			$eval . $self->_get_contents($filename),
+			\%vars,
+		);
+	}
+	catch ($ex) {
+		Gears::X::Config->raise("error in $filename: $ex");
+	}
 }
 

@@ -4,43 +4,56 @@ use v5.40;
 use Mooish::Base -standard;
 
 use overload
-	q{""} => 'as_string',
-	q{0+} => 'as_number',
+	q{""} => sub ($self, @) { $self->as_string },
+	q{0+} => sub ($self, @) { $self->as_number },
 	fallback => 1;
+
+our $PRINT_TRACE = false;
 
 has param 'message' => (
 	isa => Str,
 	writer => -hidden,
 );
 
-has field 'caller' => (
-
-	# isa => Maybe [ArrayRef],
+has field 'trace' => (
+	isa => ArrayRef,
 	builder => 1,
 );
 
-sub base_class ($self)
+sub _base_class ($self)
 {
 	return __PACKAGE__;
 }
 
-sub no_trace_regex ($self)
+sub _trace_config ($self)
 {
-	return qr/^(Gears|Type::Coercion)::/;
+	return state $conf = {
+		max_level => 20,
+		skip_package => qr/^(Gears|Type::Coercion)::/,
+		skip_file => qr/\(eval \d+\)/,
+	};
 }
 
-sub _build_caller ($self)
+sub _build_trace ($self)
 {
-	my $no_trace = $self->no_trace_regex;
-	for my $call_level (1 .. 20) {
-		my ($package, $file, $line) = caller $call_level;
-		next unless defined $package && $package !~ $no_trace;
-		next unless defined $file && $file !~ /\(eval \d+\)/;
+	my @trace;
+	my $trace_conf = $self->_trace_config;
 
-		return [$package, $file, $line];
+	for my $call_level (0 .. $trace_conf->{max_level}) {
+		my ($package, $file, $line) = CORE::caller $call_level;
+		last unless defined $package;
+		next if $package =~ $trace_conf->{skip_package};
+		next if $file =~ $trace_conf->{skip_file};
+
+		push @trace, [$file, $line];
 	}
 
-	return undef;
+	return \@trace;
+}
+
+sub caller ($self)
+{
+	return $self->trace->[0];
 }
 
 sub raise ($self, $error = undef)
@@ -52,39 +65,27 @@ sub raise ($self, $error = undef)
 	die $self;
 }
 
-sub trap_into ($class, $sub, $prefix = undef)
+sub _build_message ($self)
 {
-	try {
-		return $sub->();
-	}
-	catch ($ex) {
-		if (blessed $ex) {
-			if ($ex->isa($class)) {
-				$ex->_set_message("$prefix: " . $ex->message)
-					if $prefix;
-				$ex->raise;
-			}
-			if ($ex->isa(__PACKAGE__)) {
-				$class->raise(($prefix ? "$prefix: " : '') . $ex->message);
-			}
-		}
-		my $ex_string = "$ex";
-		chomp $ex_string;    # remove \n from dying without trace
-		$class->raise($prefix ? "$prefix: $ex_string" : $ex_string);
-	}
+	return $self->message;
 }
 
-sub as_string ($self, @)
+sub as_string ($self, $trace = $PRINT_TRACE)
 {
-	my $raised = $self->message;
+	my $raised = $self->_build_message;
 
-	my $caller = $self->caller;
-	if (defined $caller) {
-		$raised .= ' (raised at ' . $caller->[1] . ', line ' . $caller->[2] . ')';
+	if ($trace) {
+		$raised .= "\nStack trace:\n";
+		foreach my $trace ($self->trace->@*) {
+			$raised .= "  $trace->[0], line $trace->[1]\n";
+		}
+	}
+	elsif (defined(my $caller = $self->caller)) {
+		$raised .= " (raised at $caller->[0], line $caller->[1])";
 	}
 
 	my $class = ref $self;
-	my $base = $self->base_class;
+	my $base = $self->_base_class;
 	if ($class eq $base) {
 		$class = '';
 	}
@@ -95,7 +96,7 @@ sub as_string ($self, @)
 	return "An error occured: $class$raised";
 }
 
-sub as_number ($self, @)
+sub as_number ($self)
 {
 	return refaddr $self;
 }
