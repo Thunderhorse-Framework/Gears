@@ -9,11 +9,6 @@ requires qw(
 	pattern
 );
 
-has param 'router' => (
-	isa => InstanceOf ['Gears::Router'],
-	weak_ref => 1,
-);
-
 has field 'locations' => (
 	isa => ArrayRef [InstanceOf ['Gears::Router::Location']],
 	default => sub { [] },
@@ -21,18 +16,12 @@ has field 'locations' => (
 
 sub add ($self, $pattern, %data)
 {
-	my $location = load_package($self->router->location_impl)->new(
+	my $location = load_package($self->location_impl)->new(
 		%data,
-		router => $self->router,
 		pattern => $self->pattern . $pattern,
 	);
 
 	push $self->locations->@*, $location;
 	return $location;
-}
-
-sub match ($self, $request_path)
-{
-	return map { $_->match($request_path) } $self->locations->@*;
 }
 

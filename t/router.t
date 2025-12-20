@@ -5,11 +5,6 @@ use Gears::Router;
 # This tests whether the basic router works
 ################################################################################
 
-subtest 'router should be constructed and point to itself' => sub {
-	my $r = Gears::Router->new;
-	ok $r->router == $r, "router's router ok";
-};
-
 subtest 'router should produce valid locations' => sub {
 	my $r = Gears::Router->new;
 

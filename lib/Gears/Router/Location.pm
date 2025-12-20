@@ -3,13 +3,13 @@ package Gears::Router::Location;
 use v5.40;
 use Mooish::Base -standard;
 
-use Gears qw(load_package);
+use Gears::Router::Pattern;
 
 has param 'pattern' => (
 	isa => Str,
 );
 
-has field '_pattern_obj' => (
+has field 'pattern_obj' => (
 	isa => InstanceOf ['Gears::Router::Pattern'],
 	lazy => 1,
 );
@@ -18,23 +18,23 @@ with qw(
 	Gears::Router::Proto
 );
 
-sub _build_pattern_obj ($self)
+sub location_impl ($self)
 {
-	return load_package($self->router->pattern_impl)->new(
-		location => $self,
-	);
+	return ref $self;
 }
 
-around match => sub ($orig, $self, $request_path) {
-	if ($self->_pattern_obj->compare($request_path)) {
-		return ($self, $self->$orig($request_path));
-	}
-
-	return ();
-};
+sub is_bridge ($self)
+{
+	return $self->locations->@* > 0;
+}
 
 sub build ($self, @more_args)
 {
-	return $self->_pattern_obj->build(@more_args);
+	return $self->pattern_obj->build(@more_args);
+}
+
+sub _build_pattern_obj ($self)
+{
+	...;
 }
 
