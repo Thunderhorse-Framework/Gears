@@ -33,11 +33,6 @@ sub add ($self, $pattern, %data)
 
 sub match ($self, $request_path)
 {
-	my @matched;
-	foreach my $location ($self->locations->@*) {
-		push @matched, $location->match($request_path)->@*;
-	}
-
-	return \@matched;
+	return map { $_->match($request_path) } $self->locations->@*;
 }
 

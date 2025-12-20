@@ -27,12 +27,10 @@ sub _build_pattern_obj ($self)
 
 around match => sub ($orig, $self, $request_path) {
 	if ($self->_pattern_obj->compare($request_path)) {
-		my $result = $self->$orig($request_path);
-		unshift $result->@*, $self;
-		return $result;
+		return ($self, $self->$orig($request_path));
 	}
 
-	return [];
+	return ();
 };
 
 sub build ($self, @more_args)

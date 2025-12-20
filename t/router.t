@@ -36,13 +36,13 @@ subtest 'router should match locations' => sub {
 
 	my $t2f = $r->add('/test2/1');
 
-	is $r->match('/test'), [], 'bad match ok';
-	is $r->match('/test1'), [map { exact_ref $_ } $t1], 'match bridge ok';
-	is $r->match('/test1/1'), [map { exact_ref $_ } $t1, $t1l1], 'match full path ok';
-	is $r->match('/test1/123'), [map { exact_ref $_ } $t1], 'match too long path ok';
+	is [$r->match('/test')], [], 'bad match ok';
+	is [$r->match('/test1')], [map { exact_ref $_ } $t1], 'match bridge ok';
+	is [$r->match('/test1/1')], [map { exact_ref $_ } $t1, $t1l1], 'match full path ok';
+	is [$r->match('/test1/123')], [map { exact_ref $_ } $t1], 'match too long path ok';
 
-	is $r->match('/test2'), [map { exact_ref $_ } $t2, $t2l1], 'match empty subpath ok';
-	is $r->match('/test2/1'), [map { exact_ref $_ } $t2, $t2l2, $t2f], 'match across locations ok';
+	is [$r->match('/test2')], [map { exact_ref $_ } $t2, $t2l1], 'match empty subpath ok';
+	is [$r->match('/test2/1')], [map { exact_ref $_ } $t2, $t2l2, $t2f], 'match across locations ok';
 };
 
 done_testing;
