@@ -1,3 +1,4 @@
 [test]
 -j4
+-EPERL_STRICT=1
 
