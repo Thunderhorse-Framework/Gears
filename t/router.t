@@ -33,13 +33,15 @@ subtest 'router should match locations' => sub {
 
 	my $t2f = $r->add('/test2/1');
 
+	# NOTE: bridges are matched even if there are no matching routes underneath them
 	_match('/test', [], 'bad match ok');
-	_match('/test1', [$t1], 'match bridge ok');
-	_match('/test1/1', [$t1, $t1l1], 'match full path ok');
-	_match('/test1/123', [$t1], 'match too long path ok');
+	_match('/test1', [[$t1]], 'match bridge ok');
+	_match('/test1/1', [[$t1, $t1l1]], 'match full path ok');
+	_match('/test1/123', [[$t1]], 'match too long path ok');
 
-	_match('/test2', [$t2, $t2l1], 'match empty subpath ok');
-	_match('/test2/1', [$t2, $t2l2, $t2f], 'match across locations ok');
+	# NOTE: routes should always be matched in the order of declaration and nesting
+	_match('/test2', [[$t2, $t2l1]], 'match empty subpath ok');
+	_match('/test2/1', [[$t2, $t2l2], $t2f], 'match across locations ok');
 };
 
 subtest 'router should match overlapping locations' => sub {
@@ -50,17 +52,61 @@ subtest 'router should match overlapping locations' => sub {
 
 	my $t2 = $r->add('/test1/test2');
 	my $t2l = $t2->add('/test3');
-	_match('/test1/test2/test3', [$t1, $t1l, $t2, $t2l], 'match ok');
+	_match('/test1/test2/test3', [[$t1, $t1l], [$t2, $t2l]], 'match ok');
+};
+
+subtest 'router should match deeply nested locations' => sub {
+	$r->clear;
+
+	my @to_match;
+	my $last = $r;
+	my $prev;
+	my $last_match = \@to_match;
+	my $uri = '';
+
+	# keep it under "deep recursion" warnings (100)
+	for my $num (1 .. 95) {
+		$last = $last->add("/$num");
+		$prev = $last_match;
+		push $last_match->@*, [$last];
+		$last_match = $last_match->[-1];
+
+		$uri .= "/$num";
+	}
+
+	# add a random second location, to try confusing the router (must be a bridge)
+	my $l2 = $r->add('/1/2/3');
+	my $l2r = $l2->add('/0');
+
+	# fix last element - not considered a bridge
+	$prev->[-1] = $prev->[-1][0];
+
+	_match($uri, [@to_match, [$l2]], 'match ok');
 };
 
 done_testing;
 
+sub _rec_map ($sub, @arr)
+{
+	my @new;
+	foreach (@arr) {
+		if (ref eq 'ARRAY') {
+			push @new, [_rec_map($sub, $_->@*)];
+		}
+		else {
+			push @new, $sub->();
+		}
+	}
+
+	return @new;
+}
+
 sub _match ($route, $expected, $name)
 {
-	my @result = $r->match($route);
-	@result = map { $_->location } @result;
-	$expected->@* = map { exact_ref $_ } $expected->@*;
+	my $result = $r->match($route);
+	$result->@* = _rec_map sub { $_->location }, $result->@*;
+	$expected->@* = _rec_map sub { exact_ref $_ }, $expected->@*;
 
-	is \@result, $expected, $name;
+	is $result, $expected, $name;
 }
 

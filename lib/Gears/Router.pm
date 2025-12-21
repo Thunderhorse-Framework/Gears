@@ -26,19 +26,43 @@ sub _build_match ($self, $loc, $match_data)
 
 sub match ($self, $request_path)
 {
-	my @locations = $self->locations->@*;
-	my @matched;
+	my $root = {
+		pos => 0,
+		locations => $self->locations,
+		matched => [],
+	};
 
-	while (@locations > 0) {
-		my $loc = shift @locations;
-		my $match_data = $loc->pattern_obj->compare($request_path);
-		next unless $match_data;
+	my @context = ($root);
+	while (@context > 0) {
+		for (;; ++$context[-1]{pos}) {
+			my $loc = $context[-1]{locations}[$context[-1]{pos}];
+			last unless defined $loc;
 
-		push @matched, $self->_build_match($loc, $match_data);
-		unshift @locations, $loc->locations->@*;
+			next unless my $match_data = $loc->pattern_obj->compare($request_path);
+			my $match = $self->_build_match($loc, $match_data);
+
+			my $children = $loc->locations;
+			if ($children->@* > 0) {
+				++$context[-1]{pos};
+				push @context, {
+					pos => 0,
+					locations => $children,
+					matched => [$match],
+				};
+
+				redo; # avoid incrementing pos again
+			}
+			else {
+				push $context[-1]{matched}->@*, $match;
+			}
+		}
+
+		my $last_context = pop @context;
+		push $context[-1]{matched}->@*, $last_context->{matched}
+			if @context > 0;
 	}
 
-	return @matched;
+	return $root->{matched};
 }
 
 sub clear ($self)

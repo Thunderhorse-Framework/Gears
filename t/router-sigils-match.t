@@ -3,7 +3,7 @@ use Test2::V1 -ipP;
 use Gears::Router;
 
 ################################################################################
-# This tests whether the sigil-based matching router works, using cases taken
+# This tests whether the sigil-based router matching works, using cases taken
 # from Kelp
 ################################################################################
 
@@ -410,7 +410,7 @@ sub _get_match_named ($match)
 	my $matched = $match->matched;
 
 	return {
-		map { $tokens->[$_] => $matched->[$_] } keys $tokens->@*
+		map { $tokens->[$_]{label} => $matched->[$_] } keys $tokens->@*
 	};
 }
 
@@ -425,7 +425,7 @@ sub _match ($name, $pattern, %args)
 
 	subtest "should pass case: $name (yes)" => sub {
 		foreach my $case (keys $yes->%*) {
-			my ($match) = $r->match($case);
+			my $match = $r->match($case)->[0];
 			is _get_match_named($match), $yes->{$case}, "$case ok";
 		}
 		}
@@ -433,7 +433,7 @@ sub _match ($name, $pattern, %args)
 
 	subtest "should pass case: $name (no)" => sub {
 		foreach my $case ($no->@*) {
-			my ($match) = $r->match($case);
+			my $match = $r->match($case)->[0];
 			is $match, undef, "$case ok";
 		}
 		}
@@ -441,7 +441,7 @@ sub _match ($name, $pattern, %args)
 
 	subtest "should pass case: $name (par)" => sub {
 		foreach my $case (keys $par->%*) {
-			my ($match) = $r->match($case);
+			my $match = $r->match($case)->[0];
 			is $match->matched, $par->{$case}, "$case ok";
 		}
 		}
