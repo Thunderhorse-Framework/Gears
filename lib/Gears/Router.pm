@@ -68,5 +68,6 @@ sub match ($self, $request_path)
 sub clear ($self)
 {
 	$self->locations->@* = ();
+	return $self;
 }
 

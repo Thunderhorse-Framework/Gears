@@ -10,6 +10,7 @@ my $r = Gears::Router->new(location_impl => 'Gears::Router::Location::Match');
 
 subtest 'router should produce valid locations' => sub {
 	$r->clear;
+
 	my $loc1 = $r->add('/test');
 	my $loc2 = $loc1->add('/deep');
 
