@@ -34,7 +34,7 @@ sub match ($self, $request_path)
 
 	my @context = ($root);
 	while (@context > 0) {
-		for (;; ++$context[-1]{pos}) {
+		for (; ; ++$context[-1]{pos}) {
 			my $loc = $context[-1]{locations}[$context[-1]{pos}];
 			last unless defined $loc;
 
@@ -50,7 +50,7 @@ sub match ($self, $request_path)
 					matched => [$match],
 				};
 
-				redo; # avoid incrementing pos again
+				redo;    # avoid incrementing pos again
 			}
 			else {
 				push $context[-1]{matched}->@*, $match;

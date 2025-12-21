@@ -3,6 +3,8 @@ package Gears::Router::Pattern::SigilMatch;
 use v5.40;
 use Mooish::Base -standard;
 
+use Gears::X;
+
 extends 'Gears::Router::Pattern';
 
 has extended 'location' => (
@@ -25,19 +27,19 @@ has field 'tokens' => (
 );
 
 # helpers for matching different types of wildcards
-my sub noslash
+my sub noslash ($sigil)
 {
-	1 == grep { $_[0] eq $_ } ':', '?';
+	return 1 == grep { $sigil eq $_ } ':', '?';
 }
 
-my sub matchall
+my sub matchall ($sigil)
 {
-	1 == grep { $_[0] eq $_ } '*', '>';
+	return 1 == grep { $sigil eq $_ } '*', '>';
 }
 
-my sub optional
+my sub optional ($sigil)
 {
-	1 == grep { $_[0] eq $_ } '?', '>';
+	return 1 == grep { $sigil eq $_ } '?', '>';
 }
 
 sub _rep_regex
@@ -46,7 +48,10 @@ sub _rep_regex
 	my $qchar = quotemeta $char;
 	my $re;
 
-	push $self->tokens->@*, $token;
+	push $self->tokens->@*, {
+		sigil => $switch,
+		label => $token,
+	};
 
 	my ($prefix, $suffix) = ("(?<$token>", ')');
 	if (noslash($switch)) {
@@ -67,7 +72,7 @@ sub _rep_regex
 
 sub _build_regex ($self)
 {
-	my $pattern = $self->location->pattern;
+	my $pattern = $self->pattern;
 
 	my $placeholder_pattern = qr{
 		( [^\0]? ) # preceding char, may change behavior of some placeholders
@@ -133,6 +138,11 @@ sub _build_regex ($self)
 	return qr{^$pattern};
 }
 
+sub BUILD ($self, $)
+{
+	$self->_regex;    # ensure tokens are created
+}
+
 sub compare ($self, $request_path)
 {
 	return undef unless $request_path =~ $self->_regex;
@@ -141,11 +151,41 @@ sub compare ($self, $request_path)
 	my %named = ($self->defaults->%*, %+);
 
 	# transform into a list of parameters
-	return [map { $named{$_} } $self->tokens->@*];
+	return [map { $named{$_->{label}} } $self->tokens->@*];
 }
 
-sub build ($self, @more_args)
+sub build ($self, %args)
 {
-	# TODO
+	my $pattern = $self->pattern;
+	my $checks = $self->checks;
+	%args = ($self->defaults->%*, %args);
+
+	foreach my $token ($self->tokens->@*) {
+		my $value = $args{$token->{label}};
+		my $optional = optional $token->{sigil};
+
+		Gears::X->raise("no value for placeholder $token->{sigil}$token->{label}")
+			unless defined $value || $optional;
+
+		my $to_replace = qr{
+			\{?                      # may be embraced in curlies
+				\Q$token->{sigil}\E
+				$token->{label}
+			\}?
+		}x;
+
+		if (defined $value) {
+			my $check = $checks->{$token->{label}};
+			Gears::X->raise("bad value for placeholder $token->{sigil}$token->{label}")
+				if $check && $value !~ /^$check$/;
+
+			$pattern =~ s{$to_replace}{$value};
+		}
+		else {
+			$pattern =~ s{/?$to_replace}{};
+		}
+	}
+
+	return $pattern;
 }
 
