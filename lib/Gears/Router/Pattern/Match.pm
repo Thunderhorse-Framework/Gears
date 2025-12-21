@@ -9,12 +9,16 @@ sub compare ($self, $request_path)
 {
 	my $pattern = $self->location->pattern;
 
-	if ($self->location->is_bridge) {
-		return $request_path =~ m/^\Q$pattern\E/;
+	if ($self->is_bridge) {
+		return undef
+			unless scalar $request_path =~ m/^\Q$pattern\E/;
 	}
 	else {
-		return $request_path eq $pattern;
+		return undef
+			unless $request_path eq $pattern;
 	}
+
+	return [];
 }
 
 sub build ($self, @more_args)

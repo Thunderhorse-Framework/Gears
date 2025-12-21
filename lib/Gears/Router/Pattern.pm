@@ -6,6 +6,7 @@ use Mooish::Base -standard;
 has param 'location' => (
 	isa => InstanceOf ['Gears::Router::Location'],
 	weak_ref => 1,
+	handles => [qw(is_bridge)],
 );
 
 sub compare ($self, $request_path)

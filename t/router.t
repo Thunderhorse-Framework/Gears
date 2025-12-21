@@ -1,3 +1,4 @@
+use v5.40;
 use Test2::V1 -ipP;
 use Gears::Router;
 
@@ -32,14 +33,34 @@ subtest 'router should match locations' => sub {
 
 	my $t2f = $r->add('/test2/1');
 
-	is [$r->match('/test')], [], 'bad match ok';
-	is [$r->match('/test1')], [map { exact_ref $_ } $t1], 'match bridge ok';
-	is [$r->match('/test1/1')], [map { exact_ref $_ } $t1, $t1l1], 'match full path ok';
-	is [$r->match('/test1/123')], [map { exact_ref $_ } $t1], 'match too long path ok';
+	_match('/test', [], 'bad match ok');
+	_match('/test1', [$t1], 'match bridge ok');
+	_match('/test1/1', [$t1, $t1l1], 'match full path ok');
+	_match('/test1/123', [$t1], 'match too long path ok');
 
-	is [$r->match('/test2')], [map { exact_ref $_ } $t2, $t2l1], 'match empty subpath ok';
-	is [$r->match('/test2/1')], [map { exact_ref $_ } $t2, $t2l2, $t2f], 'match across locations ok';
+	_match('/test2', [$t2, $t2l1], 'match empty subpath ok');
+	_match('/test2/1', [$t2, $t2l2, $t2f], 'match across locations ok');
+};
+
+subtest 'router should match overlapping locations' => sub {
+	$r->clear;
+
+	my $t1 = $r->add('/test1');
+	my $t1l = $t1->add('/test2/test3');
+
+	my $t2 = $r->add('/test1/test2');
+	my $t2l = $t2->add('/test3');
+	_match('/test1/test2/test3', [$t1, $t1l, $t2, $t2l], 'match ok');
 };
 
 done_testing;
+
+sub _match ($route, $expected, $name)
+{
+	my @result = $r->match($route);
+	@result = map { $_->location } @result;
+	$expected->@* = map { exact_ref $_ } $expected->@*;
+
+	is \@result, $expected, $name;
+}
 
