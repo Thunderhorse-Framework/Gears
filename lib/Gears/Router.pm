@@ -7,7 +7,6 @@ use Gears::Router::Match;
 
 has param 'location_impl' => (
 	isa => Str,
-	default => 'Gears::Router::Location::Match',
 );
 
 with qw(Gears::Router::Proto);

@@ -6,7 +6,7 @@ use Gears::Router;
 # This tests whether the basic router works
 ################################################################################
 
-my $r = Gears::Router->new;
+my $r = Gears::Router->new(location_impl => 'Gears::Router::Location::Match');
 
 subtest 'router should produce valid locations' => sub {
 	$r->clear;
