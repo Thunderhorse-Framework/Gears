@@ -1,13 +1,15 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Gears::Router;
+
+use lib 't/lib';
+use Gears::Test::Router;
 
 ################################################################################
 # This tests whether the sigil-based router matching works, using cases taken
 # from Kelp
 ################################################################################
 
-my $r = Gears::Router->new(
+my $r = Gears::Test::Router->new(
 	location_impl => 'Gears::Router::Location::SigilMatch',
 );
 

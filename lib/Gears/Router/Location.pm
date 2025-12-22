@@ -18,11 +18,6 @@ with qw(
 	Gears::Router::Proto
 );
 
-sub location_impl ($self)
-{
-	return ref $self;
-}
-
 sub is_bridge ($self)
 {
 	return $self->locations->@* > 0;

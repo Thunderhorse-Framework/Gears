@@ -1,12 +1,14 @@
 use v5.40;
 use Test2::V1 -ipP;
-use Gears::Router;
+
+use lib 't/lib';
+use Gears::Test::Router;
 
 ################################################################################
 # This tests whether the basic router works
 ################################################################################
 
-my $r = Gears::Router->new(location_impl => 'Gears::Router::Location::Match');
+my $r = Gears::Test::Router->new(location_impl => 'Gears::Router::Location::Match');
 
 subtest 'router should produce valid locations' => sub {
 	$r->clear;

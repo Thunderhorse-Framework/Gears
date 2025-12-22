@@ -5,15 +5,22 @@ use Mooish::Base -standard;
 
 use Gears::Router::Match;
 
-has param 'location_impl' => (
-	isa => Str,
-);
-
 with qw(Gears::Router::Proto);
+
+# this is the router
+has extended 'router' => (
+	init_arg => undef,
+	default => sub ($self) { $self },
+);
 
 sub pattern ($self)
 {
 	return '';
+}
+
+sub _build_location ($self, %args)
+{
+	...;
 }
 
 sub _build_match ($self, $loc, $match_data)

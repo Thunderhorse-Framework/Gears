@@ -25,6 +25,6 @@ sub compare ($self, $request_path)
 
 sub build ($self, @more_args)
 {
-	return $self->location->pattern;
+	return $self->pattern;
 }
 
