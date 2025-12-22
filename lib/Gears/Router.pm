@@ -48,6 +48,21 @@ sub match ($self, $request_path)
 	return [$self->_match_level($self->locations, $request_path)];
 }
 
+sub flatten ($self, $matches)
+{
+	my @flat_matches;
+	foreach my $match ($matches->@*) {
+		if (ref $match eq 'ARRAY') {
+			push @flat_matches, $self->flatten($match);
+		}
+		else {
+			push @flat_matches, $match;
+		}
+	}
+
+	return @flat_matches;
+}
+
 sub clear ($self)
 {
 	$self->locations->@* = ();

@@ -61,6 +61,7 @@ subtest 'router should match deeply nested locations' => sub {
 
 	my @to_match;
 	my $last = $r;
+	my @list;
 	my $prev;
 	my $last_match = \@to_match;
 	my $uri = '';
@@ -69,6 +70,7 @@ subtest 'router should match deeply nested locations' => sub {
 	for my $num (1 .. 95) {
 		$last = $last->add("/$num");
 		$prev = $last_match;
+		push @list, $last;
 		push $last_match->@*, [$last];
 		$last_match = $last_match->[-1];
 
@@ -83,6 +85,11 @@ subtest 'router should match deeply nested locations' => sub {
 	$prev->[-1] = $prev->[-1][0];
 
 	_match($uri, [@to_match, [$l2]], 'match ok');
+
+	my @flat_matches = $r->flatten($r->match($uri));
+	is [map { $_->location } @flat_matches],
+		[map { exact_ref $_ } @list, $l2],
+		'flat matches ok';
 };
 
 done_testing;
