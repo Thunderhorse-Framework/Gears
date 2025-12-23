@@ -23,12 +23,9 @@ sub _build_location ($self, %args)
 	...;
 }
 
-sub _build_match ($self, $loc, $match_data)
+sub _build_match ($self, %args)
 {
-	return Gears::Router::Match->new(
-		location => $loc,
-		matched => $match_data,
-	);
+	return Gears::Router::Match->new(%args);
 }
 
 sub _match_level ($self, $locations, @args)
@@ -36,7 +33,10 @@ sub _match_level ($self, $locations, @args)
 	my @matched;
 	foreach my $loc ($locations->@*) {
 		next unless my $match_data = $loc->compare(@args);
-		my $match = $self->_build_match($loc, $match_data);
+		my $match = $self->_build_match(
+			location => $loc,
+			matched => $match_data,
+		);
 
 		my $children = $loc->locations;
 		if ($children->@* > 0) {
