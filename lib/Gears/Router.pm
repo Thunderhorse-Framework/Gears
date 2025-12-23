@@ -7,22 +7,27 @@ use Gears::Router::Match;
 
 with qw(Gears::Router::Proto);
 
-# this is the router
+# we are the router
 has extended 'router' => (
 	init_arg => undef,
 	default => sub ($self) { $self },
 );
 
+# base route is an empty string
 sub pattern ($self)
 {
 	return '';
 }
 
+# builds a new location - see Gears::Router::Proto
+# can be reimelemented
 sub _build_location ($self, %args)
 {
 	...;
 }
 
+# builds a new match
+# can be reimelemented
 sub _build_match ($self, %args)
 {
 	return Gears::Router::Match->new(%args);
@@ -86,4 +91,124 @@ sub clear ($self)
 	$self->locations->@* = ();
 	return $self;
 }
+
+__END__
+
+=head1 NAME
+
+Gears::Router - Pattern matching system
+
+=head1 SYNOPSIS
+
+	use Gears::Router;
+
+	my $router = Gears::Router->new;
+
+	# Add locations with patterns
+	$router->add('/user/:id', { name => 'user_detail' });
+	$router->add('/blog/*path', { name => 'blog' });
+
+	# Match against a path
+	my @matches = $router->match('/user/123');
+
+	# Flat match returns all matches in a flat list
+	my @flat = $router->flat_match('/blog/2025/01/post');
+
+	# Clear all locations
+	$router->clear;
+
+=head1 DESCRIPTION
+
+Gears::Router is the main routing component that manages URL pattern matching.
+It serves as the root of a routing tree structure and maintains a collection of
+locations (patterns) that can be matched against incoming paths.
+
+The router supports hierarchical matching where locations can have child
+locations (bridges), allowing for nested route structures. Bridges are matched
+even if there are no matching routes underneath them, and routes are always
+matched in the order of declaration and nesting.
+
+This router is abstract and very basic by design. A subclass of it must be
+created, and it must implement the C<_build_location> method. Some example
+location implementations are included in the C<Gears::Router::Location::>
+namespace. Take a look at L<Gears::Router::Location::SigilMatch>, which
+implements a similar placeholders system to L<Kelp>.
+
+=head1 INTERFACE
+
+=head2 Attributes
+
+=head3 locations
+
+An array reference of L<Gears::Router::Location> objects representing the
+registered route patterns.
+
+I<Not available in constructor>
+
+=head2 Methods
+
+=head3 new
+
+	$object = $class->new(%args)
+
+A standard Mooish constructor. Consult L</Attributes> section to learn what
+keys can key passed in C<%args>.
+
+=head3 pattern
+
+	$str = $router->pattern()
+
+Returns the pattern string for this router. Since this is the root router, it
+always returns an empty string.
+
+=head3 add
+
+	$location = $router->add($pattern, $data = {})
+
+Adds a new location with the specified pattern to the router. The C<$pattern>
+is a string that may contain placeholders, but the exact behavior depends on
+the used L<Gears::Router::Location> implementation. The optional C<$data> hash
+reference contains additional metadata for the location.
+
+Returns the newly created L<Gears::Router::Location> object. Since locations
+share some common interface with the router, L</add> can be called again on the
+resulted location. It is a preferred way of structuring routes in the
+application.
+
+=head3 match
+
+	@matches = $router->match($path)
+
+Matches the given path string against all registered locations. Returns a
+nested array structure where matches that have child locations (bridges) are
+represented as array references containing the parent match as the first
+element, and its children's matches as subsequent elements. Each match is a
+L<Gears::Router::Match> object.
+
+=head3 flat_match
+
+	@matches = $router->flat_match($path)
+
+Similar to L</match>, but returns all matches in a flat list instead of a
+nested structure. Matches should be processed from index C<0> up. With this
+structure, there is no way to tell which matches were part of which bridges
+without inspecting the router locations manually.
+
+This is useful when you want to process all matching locations without dealing
+with the hierarchical structure. Alternatively, L</flatten> can be called on the
+result of L</match> to obtain the same result.
+
+=head3 flatten
+
+	@flat_matches = $router->flatten($matches)
+
+Takes a nested array structure of matches (as returned by L</match>) and
+flattens it into a single-level list. This is used internally by L</flat_match>.
+
+=head3 clear
+
+	$router = $router->clear()
+
+Clears the router - this includes removing all registered locations from the
+router. Returns the router object for method chaining.
 

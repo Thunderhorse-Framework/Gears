@@ -188,3 +188,82 @@ sub build ($self, %args)
 	return $pattern;
 }
 
+__END__
+
+=head1 NAME
+
+Gears::Router::Pattern::SigilMatch - Pattern matching with placeholder support
+
+=head1 SYNOPSIS
+
+	use Gears::Router::Pattern::SigilMatch;
+
+	my $pattern = Gears::Router::Pattern::SigilMatch->new(
+		location => $location,
+	);
+
+	# Match and extract placeholders
+	my $match_data = $pattern->compare('/user/123/post/my-slug');
+	# $match_data = ['123', 'my-slug']
+
+	# Build URL from placeholders
+	my $url = $pattern->build(id => 456, slug => 'new-slug');
+	# $url = '/user/456/post/new-slug'
+
+=head1 DESCRIPTION
+
+Gears::Router::Pattern::SigilMatch provides pattern matching with support for
+placeholders using sigils. It converts patterns with sigils into regular
+expressions for matching and can build URLs by substituting placeholder values.
+
+See L<Gears::Router::Location::SigilMatch>, which discusses placeholder types
+and their behavior.
+
+=head1 INTERFACE
+
+Inherits interface from L<Gears::Router::Pattern>.
+
+=head2 Attributes
+
+=head3 tokens
+
+An array reference of token definitions extracted from the pattern. Each token
+is a hash with C<sigil> and C<label> keys. This is populated automatically when
+the pattern object is built.
+
+I<Not available in constructor>
+
+=head3 checks
+
+A hash reference of validation patterns for placeholders, taken from the
+location data.
+
+I<Not available in constructor>
+
+=head3 defaults
+
+A hash reference of default values for placeholders, taken from the location
+data.
+
+I<Not available in constructor>
+
+=head2 Methods
+
+=head3 compare
+
+	$match_data = $pattern->compare($request_path)
+
+Matches the request path against the pattern's compiled regular expression.
+Returns an array reference containing the extracted placeholder values in the
+order they appear in the pattern. Returns C<undef> if the path doesn't match.
+Default values are applied for optional placeholders that weren't matched.
+
+=head3 build
+
+	$url = $pattern->build(%params)
+
+Builds a URL by substituting placeholders in the pattern with provided
+parameter values. Default values are used for parameters not provided. Throws
+an exception if required parameters are missing or if parameter values don't
+pass their checks.
+
