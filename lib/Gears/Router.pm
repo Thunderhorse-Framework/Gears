@@ -158,7 +158,7 @@ Here is how a minimal working router subclass could be implemented:
 		return My::Gears::Router::Location->new(%args);
 	}
 
-Here is how a minimal location implementation could be implemented, extending
+Here is how a minimal location subclass could be implemented, extending
 L<Gears::Router::Location::SigilMatch> and adding a mandatory code reference to
 it:
 
