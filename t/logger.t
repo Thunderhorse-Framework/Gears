@@ -1,8 +1,6 @@
+use v5.40;
 use Test2::V1 -ipP;
 use Gears::Logger;
-
-use lib 't/lib';
-use Gears::Test::Logger;
 
 use autodie;
 
@@ -10,28 +8,37 @@ use autodie;
 # This tests whether the basic logger works
 ################################################################################
 
-subtest 'should output messages to stdout' => sub {
-	my $logger = Gears::Logger->new;
+package Gears::Test::Logger {
+	use Mooish::Base -standard;
 
-	open my $fake_stdout, '>', \my $output;
-	my $old_stdout = \*STDOUT;
-	*STDOUT = $fake_stdout;
+	extends 'Gears::Logger';
 
-	$logger->message(info => 'test');
+	has param 'log_dest' => (
+		isa => ArrayRef,
+	);
 
-	*STDOUT = $old_stdout;
-	close $fake_stdout;
+	sub _log_message ($self, $message)
+	{
+		push $self->log_dest->@*, $message;
+	}
+}
 
-	like $output, qr{^\[.+\] \[info\] test$}, 'message ok';
-};
-
-subtest 'should output messages to a custom location (subclass)' => sub {
+subtest 'should output string messages' => sub {
 	my @logs;
 	my $logger = Gears::Test::Logger->new(log_dest => \@logs);
 
 	$logger->message(error => 'custom test');
 	is scalar @logs, 1, 'message logged';
 	like $logs[0], qr{^\[.+\] \[error\] custom test$}, 'message ok';
+};
+
+subtest 'should output ref messages' => sub {
+	my @logs;
+	my $logger = Gears::Test::Logger->new(log_dest => \@logs);
+
+	$logger->message(error => ['test1', 'test2']);
+	is scalar @logs, 1, 'message logged';
+	like $logs[0], qr{^\[.+\] \[error\] \$VAR1 = \[\v\s*'test1'}, 'message ok';
 };
 
 done_testing;

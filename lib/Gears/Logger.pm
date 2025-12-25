@@ -29,7 +29,7 @@ sub _build_message ($self, $level, $message)
 
 sub _log_message ($self, $message)
 {
-	say $message;
+	...;
 }
 
 sub message ($self, $level, @messages)
