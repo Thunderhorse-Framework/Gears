@@ -20,6 +20,22 @@ has field 'trace' => (
 	builder => 1,
 );
 
+my @ignored = qw(Gears Type::Coercion);
+my $packages_to_skip;
+_rebuild_skip();
+
+sub _rebuild_skip
+{
+	my $sub_re = join '|', map { quotemeta } @ignored;
+	$packages_to_skip = qr/^($sub_re)::/;
+}
+
+sub add_ignored_namespace($self, $module)
+{
+	push @ignored, $module;
+	_rebuild_skip;
+}
+
 sub _base_class ($self)
 {
 	return __PACKAGE__;
@@ -29,7 +45,7 @@ sub _trace_config ($self)
 {
 	return state $conf = {
 		max_level => 20,
-		skip_package => qr/^(Gears|Type::Coercion)::/,
+		skip_package => \$packages_to_skip,
 		skip_file => qr/\(eval \d+\)/,
 	};
 }
@@ -42,7 +58,7 @@ sub _build_trace ($self)
 	for my $call_level (0 .. $trace_conf->{max_level}) {
 		my ($package, $file, $line) = CORE::caller $call_level;
 		last unless defined $package;
-		next if $package =~ $trace_conf->{skip_package};
+		next if $package =~ $trace_conf->{skip_package}->$*;
 		next if $file =~ $trace_conf->{skip_file};
 
 		push @trace, [$file, $line];
