@@ -60,6 +60,7 @@ sub _build_trace ($self)
 		last unless defined $package;
 		next if $package =~ $trace_conf->{skip_package}->$*;
 		next if $file =~ $trace_conf->{skip_file};
+		next if @trace > 0 && $trace[-1][0] eq $file && $trace[-1][1] == $line;
 
 		push @trace, [$file, $line];
 	}

@@ -6,6 +6,8 @@ use Mooish::Base -standard;
 use Gears qw(load_component get_component_name);
 use Gears::X;
 
+extends 'Gears::Component';
+
 has param 'controllers_base' => (
 	isa => Str,
 	builder => 1,
@@ -18,6 +20,11 @@ has param 'router' => (
 has field 'controllers' => (
 	isa => ArrayRef [InstanceOf ['Gears::Controller']],
 	writer => -hidden,
+);
+
+# we are the app
+has extended 'app' => (
+	default => sub ($self) { $self },
 );
 
 sub _build_controllers_base ($self)
@@ -37,14 +44,5 @@ sub set_controllers ($self, @list)
 
 	$self->_set_controllers(\@controllers);
 	return;
-}
-
-sub BUILD ($self, $)
-{
-	$self->build;
-}
-
-sub build ($self)
-{
 }
 
