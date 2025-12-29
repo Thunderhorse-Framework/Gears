@@ -4,7 +4,7 @@ use v5.40;
 use Mooish::Base -standard;
 
 use Gears::Config::Reader::PerlScript;
-use Gears::X;
+use Gears::X::Config;
 use Value::Diff;
 
 has param 'readers' => (
@@ -75,7 +75,7 @@ sub parse ($self, $source_type, $source)
 			last;
 		}
 
-		Gears::X->raise("no reader to handle file: $source")
+		Gears::X::Config->raise("no reader to handle file: $source")
 			unless defined $config;
 
 		return $config;
@@ -84,7 +84,7 @@ sub parse ($self, $source_type, $source)
 		return $source;
 	}
 	else {
-		Gears::X->raise("unknown type of config to add: $source_type");
+		Gears::X::Config->raise("unknown type of config to add: $source_type");
 	}
 }
 
@@ -92,5 +92,20 @@ sub add ($self, $source_type, $source)
 {
 	$self->merge($self->parse($source_type, $source));
 	return $self;
+}
+
+sub get ($self, $path, $default = undef)
+{
+	my $current = $self->config;
+
+	foreach my $part (split /\./, $path) {
+		Gears::X::Config->raise("invalid config path $path at part $part - not a hash")
+			unless ref $current eq 'HASH';
+
+		return $default unless exists $current->{$part};
+		$current = $current->{$part};
+	}
+
+	return $current;
 }
 

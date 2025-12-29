@@ -67,5 +67,29 @@ subtest 'should remove array elements' => sub {
 	is $c->config, {a => [1, 3]}, 'config ok';
 };
 
+subtest 'should get config values by path' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => {b => {c => 42}}, d => 'test', e => undef});
+
+	is $c->get('a.b.c'), 42, 'nested value ok';
+	is $c->get('d'), 'test', 'top level value ok';
+	is $c->get('a.b'), {c => 42}, 'partial path ok';
+	is $c->get('missing'), undef, 'missing key returns undef';
+	is $c->get('missing', 'default'), 'default', 'missing key returns default';
+	is $c->get('a.missing', 'default'), 'default', 'missing nested key returns default';
+	is $c->get('e', 'default'), undef, 'default value not used for existing keys';
+
+	my $ex = dies { $c->get('d.nested') };
+	like $ex, qr{invalid config path d\.nested at part nested - not a hash}, 'error on non-hash path';
+};
+
+subtest 'should error on array refs in path' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => [1, 2, 3]});
+
+	my $ex = dies { $c->get('a.0') };
+	like $ex, qr{invalid config path a\.0 at part 0 - not a hash}, 'error on array ref path';
+};
+
 done_testing;
 
