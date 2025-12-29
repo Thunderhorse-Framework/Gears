@@ -10,6 +10,7 @@ has param 'app' => (
 
 sub BUILD ($self, $)
 {
+	$self->configure;
 	my $class = ref $self;
 
 	# make sure superclass build method won't be called (avoid building the
@@ -17,6 +18,10 @@ sub BUILD ($self, $)
 	if (exists &{"${class}::build"}) {
 		$self->build;
 	}
+}
+
+sub configure ($self)
+{
 }
 
 sub build ($self)
