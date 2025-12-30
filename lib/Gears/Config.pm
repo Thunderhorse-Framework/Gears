@@ -19,38 +19,46 @@ has field 'config' => (
 
 my sub _merge ($this_conf, $this_diff)
 {
-	foreach my $key (keys $this_diff->%*) {
+	foreach my $key (sort keys $this_diff->%*) {
 		my $value = $this_diff->{$key};
 		my $ref = ref $value;
-		my $array_mode;
+		my $mode;
 
-		if ($ref eq 'ARRAY' && $key =~ /^([+-])/) {
-			$array_mode = $1;
+		if ($key =~ /^([+-=])/) {
+			$mode = $1;
 			$key = substr $key, 1;
 		}
 
-		if (!exists $this_conf->{$key}) {
+		# equal sign allow replacing mismatching types of refs
+		if (!exists $this_conf->{$key} || ($mode // '') eq '=') {
 			$this_conf->{$key} = $value;
 		}
 		elsif (ref $this_conf->{$key} ne $ref) {
 			Gears::X::Config->raise("configuration key type mismatch for $key");
 		}
+
 		elsif ($ref eq 'HASH') {
-			__SUB__->($this_conf->{$key}, $value);
+			if (!defined $mode || $mode eq '+') {
+				__SUB__->($this_conf->{$key}, $value);
+			}
+			else {
+				Gears::X::Config->raise("$mode$key is not supported for this ref type");
+			}
 		}
+
 		elsif ($ref eq 'ARRAY') {
-			if (!defined $array_mode) {
-				$this_conf->{$key} = $value;
-			}
-			elsif ($array_mode eq '-' && diff($this_conf->{$key}, $value, \my $rest)) {
-				$this_conf->{$key}->@* = $rest->@*;
-			}
-			elsif ($array_mode eq '+') {
+			if (!defined $mode || $mode eq '+') {
 				push $this_conf->{$key}->@*, $value->@*;
 			}
-
+			elsif ($mode eq '-' && diff($this_conf->{$key}, $value, \my $rest)) {
+				$this_conf->{$key}->@* = $rest->@*;
+			}
 		}
+
 		else {
+			Gears::X::Config->raise("$mode$key is not supported for this ref type")
+				if defined $mode;
+
 			$this_conf->{$key} = $value;
 		}
 	}

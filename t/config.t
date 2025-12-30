@@ -39,32 +39,60 @@ subtest 'should not load bad perl script configs' => sub {
 	like $ex, qr{line 4}, 'line ok';
 };
 
+subtest 'should replace different refs' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => [], b => 'test'});
+	$c->add(var => {'=a' => 'test', '=b' => []});
+	is $c->config, {a => 'test', b => []}, 'config ok';
+};
+
 subtest 'should merge hashes' => sub {
 	my $c = Gears::Config->new;
-	$c->add(var => {a => {b => 1}});
-	$c->add(var => {a => {c => 2}});
-	is $c->config, {a => {b => 1, c => 2}}, 'config ok';
+	$c->add(var => {a => {b => 1, c => 42}, d => {e => 4}});
+	$c->add(var => {a => {c => 2}, '+d' => {f => 5}});
+	is $c->config, {a => {b => 1, c => 2}, d => {e => 4, f => 5}}, 'config ok';
+};
+
+subtest 'should replace hashes' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => {b => 1, c => 2}});
+	$c->add(var => {'=a' => {d => 3}});
+	is $c->config, {a => {d => 3}}, 'config ok';
+};
+
+subtest 'should merge arrays' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => [1, 2]});
+	$c->add(var => {a => [2, 3]});
+	is $c->config, {a => [1, 2, 3]}, 'config ok';
 };
 
 subtest 'should replace arrays' => sub {
 	my $c = Gears::Config->new;
-	$c->add(var => {a => [1]});
-	$c->add(var => {a => [2]});
-	is $c->config, {a => [2]}, 'config ok';
+	$c->add(var => {a => [1, 2]});
+	$c->add(var => {'=a' => [2, 3]});
+	is $c->config, {a => [2, 3]}, 'config ok';
 };
 
 subtest 'should add array elements' => sub {
 	my $c = Gears::Config->new;
-	$c->add(var => {a => [1]});
-	$c->add(var => {'+a' => [2]});
-	is $c->config, {a => [1, 2]}, 'config ok';
+	$c->add(var => {a => [1, 2]});
+	$c->add(var => {'+a' => [2, 3]});
+	is $c->config, {a => [1, 2, 2, 3]}, 'config ok';
 };
 
 subtest 'should remove array elements' => sub {
 	my $c = Gears::Config->new;
 	$c->add(var => {a => [1, 2, 3]});
-	$c->add(var => {'-a' => [2]});
+	$c->add(var => {'-a' => [2, 4]});
 	is $c->config, {a => [1, 3]}, 'config ok';
+};
+
+subtest 'should add and remove array elements at the same time' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => [1, 2, 3]});
+	$c->add(var => {'-a' => [1, 2], '+a' => [2, 4]});
+	is $c->config, {a => [3, 2, 4]}, 'config ok';
 };
 
 subtest 'should get config values by path' => sub {
