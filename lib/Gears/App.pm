@@ -8,11 +8,6 @@ use Gears::X;
 
 extends 'Gears::Component';
 
-has param 'controllers_base' => (
-	isa => Str,
-	builder => 1,
-);
-
 has param 'router' => (
 	isa => InstanceOf ['Gears::Router'],
 );
@@ -23,7 +18,7 @@ has param 'config' => (
 
 has field 'controllers' => (
 	isa => ArrayRef [InstanceOf ['Gears::Controller']],
-	writer => -hidden,
+	default => sub { [] },
 );
 
 # we are the app
@@ -31,27 +26,17 @@ has extended 'app' => (
 	default => sub ($self) { $self },
 );
 
-sub _build_controllers_base ($self)
-{
-	return (ref $self) . '::Controller';
-}
-
 sub _build_controller ($self, $class)
 {
 	return $class->new(app => $self);
 }
 
-sub set_controllers ($self, @list)
+sub load_controller ($self, $controller)
 {
-	my $base = $self->controllers_base;
-	my @controllers;
+	my $base = (ref $self) . '::Controller';
+	my $class = get_component_name($controller, $base);
+	push $self->controllers->@*, $self->_build_controller(load_component($class));
 
-	foreach my $name (@list) {
-		my $class = get_component_name($name, $base);
-		push @controllers, $self->_build_controller(load_component($class));
-	}
-
-	$self->_set_controllers(\@controllers);
-	return;
+	return $self;
 }
 
