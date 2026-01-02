@@ -14,18 +14,9 @@ has param 'date_format' => (
 
 # apache-like format
 has param 'log_format' => (
-	isa => Str,
+	isa => Maybe [Str],
 	default => '[%s] [%s] %s'
 );
-
-sub _build_message ($self, $level, $message)
-{
-	return sprintf $self->log_format,
-		localtime->strftime($self->date_format),
-		uc $level,
-		ref $message ? Dumper($message) : $message
-		;
-}
 
 # implements actual logging of a single message
 # must be reimelemented
@@ -36,8 +27,20 @@ sub _log_message ($self, $level, $message)
 
 sub message ($self, $level, @messages)
 {
-	$self->_log_message($level, $self->_build_message($level, $_))
-		for @messages;
+	my $format = $self->log_format;
+	my $date;
+
+	for my $message (@messages) {
+		if (defined $format) {
+			$message = sprintf $format, (
+				$date //= localtime->strftime($self->date_format),
+				uc $level,
+				ref $message ? Dumper($message) : $message
+			);
+		}
+
+		$self->_log_message($level, $message);
+	}
 
 	return $self;
 }

@@ -31,6 +31,20 @@ subtest 'should output string messages' => sub {
 	like $logs[0][1], qr{^\[.+\] \[ERROR\] custom test$}, 'message ok';
 };
 
+subtest 'should output multiple messages' => sub {
+	my @logs;
+	my $logger = Gears::Test::Logger->new(log_dest => \@logs);
+
+	$logger->message(error => 'msg1', 'msg2');
+	is scalar @logs, 2, 'message logged';
+
+	is $logs[0][0], 'error', 'level ok';
+	like $logs[0][1], qr{^\[.+\] \[ERROR\] msg1$}, 'message ok';
+
+	is $logs[1][0], 'error', 'level ok';
+	like $logs[1][1], qr{^\[.+\] \[ERROR\] msg2$}, 'message ok';
+};
+
 subtest 'should output ref messages' => sub {
 	my @logs;
 	my $logger = Gears::Test::Logger->new(log_dest => \@logs);
