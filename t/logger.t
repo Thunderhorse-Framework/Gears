@@ -55,5 +55,15 @@ subtest 'should output ref messages' => sub {
 	like $logs[0][1], qr{^\[.+\] \[INFO\] \$VAR1 = \[\v\s*'test1'}, 'message ok';
 };
 
+subtest 'should not output a single trailing newline' => sub {
+	my @logs;
+	my $logger = Gears::Test::Logger->new(log_dest => \@logs);
+
+	$logger->message(info => "test\n");
+	is scalar @logs, 1, 'message logged';
+	is $logs[0][0], 'info', 'level ok';
+	like $logs[0][1], qr{^\[.+\] \[INFO\] test$}, 'message ok';
+};
+
 done_testing;
 

@@ -31,12 +31,12 @@ sub message ($self, $level, @messages)
 	my $date;
 
 	for my $message (@messages) {
+		$message = ref $message ? Dumper($message) : $message;
+		chomp $message;
+
 		if (defined $format) {
-			$message = sprintf $format, (
-				$date //= localtime->strftime($self->date_format),
-				uc $level,
-				ref $message ? Dumper($message) : $message
-			);
+			$date //= localtime->strftime($self->date_format);
+			$message = sprintf $format, $date, uc $level, $message;
 		}
 
 		$self->_log_message($level, $message);
