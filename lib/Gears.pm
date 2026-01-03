@@ -53,6 +53,8 @@ Gears - A framework to build web frameworks
 
 This module delivers basic parts of a web framework.
 
+This is a stub release which will be fully documented later. Stay tuned.
+
 =head1 SEE ALSO
 
 L<Thunderhorse>
