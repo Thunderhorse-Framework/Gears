@@ -21,12 +21,18 @@ sub handled_extensions ($self)
 # declare no lexical vars other than $vars (visible in eval)
 sub _clean_eval
 {
-	local $@;
+	my $_result;
 	my $vars = $_[2];
-	my $result = eval $_[1];
-	die $@ if $@;
 
-	return $result;
+	# avoid raising $@ when $@ is local
+	my $_err = do {
+		local $@;
+		$_result = eval $_[1];
+		$@;
+	};
+
+	die $_err if $_err;
+	return $_result;
 }
 
 sub parse ($self, $config, $filename)
@@ -40,10 +46,10 @@ sub parse ($self, $config, $filename)
 	my $vars_string = join '',
 		map {
 			if (ref $vars{$_} eq 'CODE') {
-				qq{sub $_ { \$vars->{$_}->(\@_) } };
+				qq{sub $_ { \$vars->{$_}->(\@_) }};
 			}
 			else {
-				qq{sub $_ { \$vars->{$_} } };
+				qq{sub $_ { \$vars->{$_} }};
 			}
 		}
 		keys %vars;
@@ -51,8 +57,10 @@ sub parse ($self, $config, $filename)
 	state $id = 0;
 	++$id;
 	my $eval = join ' ', split /\v/, <<~PERL;
-	package Gears::Config::Reader::PerlScript::Sandbox::$id;
-	use v5.40;
+	package Gears::Config::Reader::PerlScript::Sandbox$id;
+	use strict;
+	use warnings;
+	use builtin qw(true false);
 	$vars_string
 	PERL
 
