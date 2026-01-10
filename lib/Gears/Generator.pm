@@ -57,12 +57,17 @@ sub generate ($self, $name, $target_dir)
 
 		$target_file = path($target_file);
 		$target_file->parent->mkdir;
-		push @generated, $target_file;
+		push @generated, [$target_file, $content];
 
-		$target_file->spew({binmode => ':encoding(UTF-8)'}, $content);
+		Gears::X::Generator->raise("file already exists: $target_file, aborting")
+			if $target_file->exists;
 	}
 
-	return \@generated;
+	foreach my $item (@generated) {
+		$item->[0]->spew({binmode => ':encoding(UTF-8)'}, $item->[1]);
+	}
+
+	return [map { $_->[0] } @generated];
 }
 
 sub _process_file ($self, $name, $content)

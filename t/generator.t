@@ -23,15 +23,28 @@ subtest 'should copy a template' => sub {
 	);
 
 	my $template = $generator->get_template('generator');
-	is $template, [
-		path('t/generator/myapp.pl'),
-		path('t/generator/flat.txt'),
-		path('t/generator/dir/nested.txt'),
+	check_paths(
+		$template,
+		[
+			path('t/generator/myapp.pl'),
+			path('t/generator/flat.txt'),
+			path('t/generator/dir/nested.txt'),
 		],
-		'template files ok';
+		'template files ok'
+	);
 
 	my $tmp_dir = Path::Tiny->tempdir;
-	$generator->generate('generator', $tmp_dir);
+	my $generated = $generator->generate('generator', $tmp_dir);
+
+	check_paths(
+		$generated,
+		[
+			$tmp_dir->child('generatedapp.pl'),
+			$tmp_dir->child('flat.txt'),
+			$tmp_dir->child('dir/nested.txt'),
+		],
+		'generated files ok'
+	);
 
 	ok !$tmp_dir->child('myapp.pl')->exists, 'old name changed ok';
 	is $tmp_dir->child('generatedapp.pl')->slurp({binmode => ':encoding(UTF-8)'}),
@@ -42,5 +55,26 @@ subtest 'should copy a template' => sub {
 		"zażółć gęślą jaźń\n", 'unicode file content ok';
 };
 
+subtest 'should not override files when copying' => sub {
+	my $generator = Gears::Generator->new(
+		base_dir => 't',
+	);
+
+	my $ex = dies {
+		$generator->generate('generator', 't/generator');
+	};
+
+	isa_ok $ex, 'Gears::X::Generator';
+	like $ex, qr{\Qfile already exists: \E.+\Q, aborting\E}, 'exception ok';
+};
+
 done_testing;
+
+sub check_paths ($got, $wanted, $name)
+{
+	my @got_copy = map { $_->stringify } $got->@*;
+	my @wanted_copy = map { $_->stringify } $wanted->@*;
+
+	is \@got_copy, \@wanted_copy, $name;
+}
 
