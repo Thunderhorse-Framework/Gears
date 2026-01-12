@@ -8,7 +8,7 @@ use overload
 	q{0+} => sub ($self, @) { $self->as_number },
 	fallback => 1;
 
-our $PRINT_TRACE = false;
+our $PRINT_TRACE = $ENV{GEARS_PRINT_TRACE};
 
 has param 'message' => (
 	isa => Str,
