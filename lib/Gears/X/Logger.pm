@@ -1,4 +1,4 @@
-package Gears::X::Config;
+package Gears::X::Logger;
 
 use v5.40;
 use Mooish::Base -standard;

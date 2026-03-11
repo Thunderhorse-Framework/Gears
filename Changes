@@ -1,6 +1,7 @@
 Revision history for Gears
 
 {{$NEXT}}
+	- Fix package Gears::X::Logger (bad namespace name)
 
 0.101 - 2026-01-14
 	- Fix failing generator tests
