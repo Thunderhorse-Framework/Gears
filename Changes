@@ -1,6 +1,8 @@
 Revision history for Gears
 
 {{$NEXT}}
+
+0.104 - 2026-05-26
 	- Add pattern_separator attribute to Router
 
 0.103 - 2026-05-26
