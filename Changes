@@ -1,6 +1,7 @@
 Revision history for Gears
 
 {{$NEXT}}
+	- Bump Mooish::Base dependency
 
 0.102 - 2026-05-25
 	- Fix package Gears::X::Logger (bad namespace name)
