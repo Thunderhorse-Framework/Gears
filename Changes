@@ -1,6 +1,8 @@
 Revision history for Gears
 
 {{$NEXT}}
+
+0.103 - 2026-05-26
 	- Bump Mooish::Base dependency
 
 0.102 - 2026-05-25
