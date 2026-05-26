@@ -13,6 +13,11 @@ has extended 'router' => (
 	default => sub ($self) { $self },
 );
 
+has param 'pattern_separator' => (
+	isa => Str,
+	default => '/',
+);
+
 # base route is an empty string
 sub pattern ($self)
 {
@@ -195,6 +200,17 @@ An array reference of L<Gears::Router::Location> objects representing the
 registered route patterns.
 
 I<Not available in constructor>
+
+=head3 pattern_separator
+
+A string used as a separator for patterns - when a location is added under
+another location, their patterns will be joined using this separator, and
+trailing separator from parent and leading separator from child will be
+stripped.
+
+By default, C</> character is used.
+
+I<Available in constructor>
 
 =head2 Methods
 

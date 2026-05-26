@@ -1,6 +1,7 @@
 Revision history for Gears
 
 {{$NEXT}}
+	- Add pattern_separator attribute to Router
 
 0.103 - 2026-05-26
 	- Bump Mooish::Base dependency
