@@ -168,7 +168,7 @@ sub build ($self, %args)
 			unless defined $value || optional $token->{sigil};
 
 		if (defined $value) {
-			my $safe = '^A-Za-z0-9\-\._~';
+			my $safe = 'A-Za-z0-9\-\._~';
 			$safe .= '/' unless noslash $token->{sigil};
 			$value = uri_escape_utf8 $value, "^$safe";
 		}
