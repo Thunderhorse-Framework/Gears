@@ -24,7 +24,7 @@ my sub _merge ($this_conf, $this_diff)
 		my $ref = ref $value;
 		my $mode;
 
-		if ($key =~ /^([+-=])/) {
+		if ($key =~ /^([+=-])/) {
 			$mode = $1;
 			$key = substr $key, 1;
 		}

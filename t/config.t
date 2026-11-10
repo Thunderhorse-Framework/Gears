@@ -47,6 +47,12 @@ subtest 'should replace different refs' => sub {
 	is $c->config, {a => 'test', b => []}, 'config ok';
 };
 
+subtest 'should allow numbers (check erroneous range +-=)' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {'0a' => []});
+	is $c->config, {'0a' => []}, 'config ok';
+};
+
 subtest 'should merge hashes' => sub {
 	my $c = Gears::Config->new;
 	$c->add(var => {a => {b => 1, c => 42}, d => {e => 4}});
