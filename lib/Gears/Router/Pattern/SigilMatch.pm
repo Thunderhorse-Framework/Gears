@@ -181,7 +181,7 @@ sub build ($self, %args)
 		if (defined $value) {
 			my $check = $checks->{$token->{label}};
 			Gears::X->raise("bad value for placeholder $token->{sigil}$token->{label}")
-				if $check && $value !~ /^$check$/;
+				if $check && $value !~ /^($check)$/;
 
 			$pattern =~ s{\{?$to_replace\}?}{$value};
 		}
