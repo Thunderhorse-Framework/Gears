@@ -21,12 +21,12 @@ subtest 'should raise an exception from class' => sub {
 
 subtest 'should stringify correctly (base class)' => sub {
 	my $ex = Gears::X->new(message => 'abcd');
-	like "$ex", qr{An error occured: abcd \(raised at .+x\.t, line \d+\)}, 'stringified ok';
+	like "$ex", qr{An error occurred: abcd \(raised at .+x\.t, line \d+\)}, 'stringified ok';
 };
 
 subtest 'should stringify correctly (HTTP)' => sub {
 	my $ex = Gears::X::HTTP->new(code => 404, message => 'abcd');
-	like "$ex", qr{An error occured: \[HTTP\] 404 - abcd \(raised at .+x\.t, line \d+\)}, 'stringified ok';
+	like "$ex", qr{An error occurred: \[HTTP\] 404 - abcd \(raised at .+x\.t, line \d+\)}, 'stringified ok';
 };
 
 subtest 'should build and raise correctly (HTTP)' => sub {

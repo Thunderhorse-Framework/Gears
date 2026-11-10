@@ -55,7 +55,7 @@ Gears::X::HTTP - HTTP exception class
 	catch ($e) {
 		say $e->code;     # 400
 		say $e->message;  # Bad request
-		say $e;           # An error occured: [HTTP] 400 - Bad request (raised at ...)
+		say $e;           # An error occurred: [HTTP] 400 - Bad request (raised at ...)
 	}
 
 =head1 DESCRIPTION
