@@ -3,6 +3,7 @@ Revision history for Gears
 {{$NEXT}}
 	- added effective_charset, charset_encode, charset_decode to Gears
 	- Gears::Context app attribute is now optional
+	- fixed bad check and docs on Gears::X::HTTP status range
 
 0.104 - 2026-05-26
 	- Add pattern_separator attribute to Router

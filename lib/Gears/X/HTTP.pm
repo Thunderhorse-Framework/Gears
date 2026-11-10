@@ -6,7 +6,7 @@ use Mooish::Base -standard;
 extends 'Gears::X';
 
 has param 'code' => (
-	isa => IntRange [400, 500],
+	isa => IntRange [400, 599],
 );
 
 sub _raise_exception ($self, $code, $message)
@@ -65,7 +65,7 @@ L<Gears::X> with an HTTP status code attribute and provides a convenient
 interface for raising HTTP errors with appropriate codes.
 
 The exception enforces that the status code is in the valid HTTP error range
-(400-500). The message is automatically formatted to include the status code.
+(400-599). The message is automatically formatted to include the status code.
 
 =head1 INTERFACE
 
@@ -73,7 +73,7 @@ The exception enforces that the status code is in the valid HTTP error range
 
 =head3 code
 
-The HTTP status code. Must be in the range 400-500 (inclusive). This covers
+The HTTP status code. Must be in the range 400-599 (inclusive). This covers
 client errors (4xx) and server errors (5xx).
 
 I<Required in constructor>
