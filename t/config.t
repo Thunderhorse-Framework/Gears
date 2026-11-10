@@ -95,6 +95,13 @@ subtest 'should remove array elements' => sub {
 	is $c->config, {a => [1, 3]}, 'config ok';
 };
 
+subtest 'should remove all array elements' => sub {
+	my $c = Gears::Config->new;
+	$c->add(var => {a => [1, 2, 3]});
+	$c->add(var => {'-a' => [1, 2, 3]});
+	is $c->config, {a => []}, 'config ok';
+};
+
 subtest 'should add and remove array elements at the same time' => sub {
 	my $c = Gears::Config->new;
 	$c->add(var => {a => [1, 2, 3]});

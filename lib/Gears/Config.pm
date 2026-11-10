@@ -50,7 +50,11 @@ my sub _merge ($this_conf, $this_diff)
 			if (!defined $mode || $mode eq '+') {
 				push $this_conf->{$key}->@*, $value->@*;
 			}
-			elsif ($mode eq '-' && diff($this_conf->{$key}, $value, \my $rest)) {
+			elsif ($mode eq '-') {
+				my $rest;
+				$rest = []
+					unless diff($this_conf->{$key}, $value, \$rest);
+
 				$this_conf->{$key}->@* = $rest->@*;
 			}
 		}
