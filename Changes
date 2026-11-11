@@ -2,6 +2,7 @@ Revision history for Gears
 
 {{$NEXT}}
 	- added effective_charset, charset_encode, charset_decode to Gears
+	- added Gears::Role::HasContext
 	- Gears::Context app attribute is now optional
 	- fixed bad check and docs on Gears::X::HTTP status range
 	- fixed unintended +-= regex range in Gears::Config prefix checking
