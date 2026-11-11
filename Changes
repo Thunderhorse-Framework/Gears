@@ -9,6 +9,9 @@ Revision history for Gears
 	- fixed unintended addition of caret in safe characters when building a sigil location
 	- Gears::Generator no longer leaves created empty directories behind when aborting
 	- fixed incorrect handling of regex alternation in checks when building a sigil location
+	- pattern_separator Router attribute can now only be a single character
+	- fixed Match router bridge behavior - requires followup of separator or end of string
+	- fixed SigilMatch router separator behavior - uses pattern_separator when matching and building
 
 0.104 - 2026-05-26
 	- Add pattern_separator attribute to Router
