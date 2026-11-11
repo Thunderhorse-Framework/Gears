@@ -1,6 +1,8 @@
 Revision history for Gears
 
 {{$NEXT}}
+
+0.105 - 2026-11-11
 	- added effective_charset, charset_encode, charset_decode to Gears
 	- added Gears::Role::HasContext
 	- Gears::Context app attribute is now optional
